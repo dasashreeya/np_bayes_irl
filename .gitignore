@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Results (large files -- link W&B instead)
+results/runs/
+*.pkl
+*.npy
+
+# Jupyter
+.ipynb_checkpoints/
+
+# W&B
+wandb/
+
+# OS
+.DS_Store
+.idea/

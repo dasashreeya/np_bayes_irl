@@ -1,0 +1,13 @@
+# zartan.yaml -- overrides for Zartan cluster runs
+# Usage: python run_experiments.py --config configs/zartan.yaml
+
+gibbs:
+  n_sweeps: 500
+
+parallel:
+  n_workers: 16        # Zartan has 16+ cores
+  ray_address: auto    # connect to existing Ray cluster
+
+logging:
+  project: np-bayes-irl
+  name: zartan-run

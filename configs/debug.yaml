@@ -1,0 +1,14 @@
+# debug.yaml -- fast settings for testing (not for real results)
+gibbs:
+  n_sweeps: 20
+  burn_in: 5
+
+data:
+  n_per_type: 5
+
+parallel:
+  n_workers: 2
+
+logging:
+  project: np-bayes-irl-debug
+  log_every: 5
