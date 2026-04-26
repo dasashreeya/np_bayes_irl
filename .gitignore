@@ -20,6 +20,3 @@ wandb/
 # OS
 .DS_Store
 .idea/
-
-.claude/
-np_bayes_irl/
