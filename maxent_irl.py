@@ -9,18 +9,35 @@ import numpy as np
 from mdp_utils import soft_value_iteration, boltzmann_policy
 
 
+# def feature_expectations(trajectories, phi):
+#     """
+#     Empirical feature counts from expert trajectories.
+#     trajectories: list of (states, actions) tuples, states is list of int indices
+#     phi: (n_states, n_features)
+#     Returns: (n_features,) mean feature vector
+#     """
+#     n_features = phi.shape[1]
+#     mu = np.zeros(n_features)
+#     total = 0
+#     for (states, actions) in trajectories:
+#         for s in states:
+#             mu += np.array(phi[s])
+#             total += 1
+#     return mu / total if total > 0 else mu
+
+
 def feature_expectations(trajectories, phi):
     """
     Empirical feature counts from expert trajectories.
-    trajectories: list of (states, actions) tuples, states is list of int indices
+    trajectories: list of trajectories, each a list of (state, action) tuples
     phi: (n_states, n_features)
     Returns: (n_features,) mean feature vector
     """
     n_features = phi.shape[1]
     mu = np.zeros(n_features)
     total = 0
-    for (states, actions) in trajectories:
-        for s in states:
+    for traj in trajectories:
+        for (s, a) in traj:
             mu += np.array(phi[s])
             total += 1
     return mu / total if total > 0 else mu

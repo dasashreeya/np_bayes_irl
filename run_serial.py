@@ -18,8 +18,8 @@ def run_experiment(n_sweeps=300, alpha=1.0, step_size=0.1, seed=0):
 
     # --- Env setup ---
     env = ObjectWorld()
-    phi = env.features()   # (n_states, n_features)
-    T   = env.transitions() # (n_states, n_actions, n_states)
+    phi = env.features()
+    T   = env.transitions()
     gamma, beta = 0.95, 5.0
 
     trajs, true_weights, true_assignments = generate_dataset(
@@ -49,22 +49,38 @@ def run_experiment(n_sweeps=300, alpha=1.0, step_size=0.1, seed=0):
     weight_vectors = [sample_new_weights(k, phi.shape[1]) for k in init_keys]
     assignments, weight_vectors = remap_assignments(assignments, weight_vectors)
 
+    # Pack into state dict for the new gibbs_sweep API
+    state = {
+        'assignments':    assignments,
+        'weight_vectors': weight_vectors,
+    }
+
     # --- Gibbs loop ---
     for sweep in range(n_sweeps):
         rng, sk = jax.random.split(rng)
-        assignments, weight_vectors, _ = gibbs_sweep(
-            trajs, assignments, weight_vectors,
-            alpha, phi, T, gamma, beta, step_size, sk)
+        state, _ = gibbs_sweep(
+            trajs, state, phi, T,
+            alpha=alpha, gamma=gamma, beta=beta,
+            step_size=step_size, rng_key=sk,
+        )
 
         if sweep % 10 == 0 or sweep == n_sweeps - 1:
-            metrics = log_metrics(sweep, assignments, weight_vectors,
-                                  true_weights, true_assignments)
+            metrics = log_metrics(
+                sweep,
+                state['assignments'],
+                state['weight_vectors'],
+                true_weights,
+                true_assignments,
+            )
             wandb.log({
                 'sweep':      sweep,
                 'n_clusters': metrics['n_clusters'],
                 'l2_error':   metrics['l2_error'],
                 'ari':        metrics['ari'],
             })
+
+    assignments    = state['assignments']
+    weight_vectors = state['weight_vectors']
 
     # --- MaxEnt baseline on same data ---
     print("\n--- MaxEnt IRL Baseline ---")
