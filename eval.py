@@ -12,6 +12,12 @@ try:
 except ImportError:
     WANDB = False
 
+try:
+    from scipy.stats import pearsonr
+    SCIPY = True
+except ImportError:
+    SCIPY = False
+
 
 def l2_weight_error(w_true, w_recovered):
     """Normalized L2 between true and recovered weight vectors."""
@@ -41,6 +47,85 @@ def adjusted_rand_index(true_assignments, pred_assignments):
     ARI=1.0 for perfect match (label-permutation invariant).
     """
     return float(adjusted_rand_score(true_assignments, pred_assignments))
+
+
+def policy_similarity(w_true, w_recovered, test_obs_list, env,
+                      beta=1.0, n_action_samples=20):
+    """
+    KL divergence between true and recovered policy action distributions,
+    averaged over test_obs_list.
+
+    Approximates both policies as Boltzmann distributions over sampled actions.
+    Lower is better (KL >= 0).
+
+    Args:
+        w_true:          flat neural reward parameter vector (true)
+        w_recovered:     flat neural reward parameter vector (recovered)
+        test_obs_list:   list of (obs_dim,) observations
+        env:             MuJoCoEnv instance for sampling actions
+        beta:            inverse temperature
+        n_action_samples: number of random actions to approximate distribution
+
+    Returns:
+        mean KL divergence (float)
+    """
+    import jax.numpy as jnp
+    from neural_reward import compute_reward
+
+    kls = []
+    for obs in test_obs_list:
+        obs_arr = np.array(obs, dtype=np.float32)
+        actions = [env.sample_action() for _ in range(n_action_samples)]
+
+        r_true = np.array([float(compute_reward(w_true, jnp.asarray(obs_arr)))
+                           for _ in actions], dtype=np.float64)
+        r_rec  = np.array([float(compute_reward(w_recovered, jnp.asarray(obs_arr)))
+                           for _ in actions], dtype=np.float64)
+
+        def softmax(x):
+            x = x - x.max()
+            e = np.exp(beta * x)
+            return e / e.sum()
+
+        p = softmax(r_true)
+        q = softmax(r_rec)
+        kl = float(np.sum(p * np.log((p + 1e-12) / (q + 1e-12))))
+        kls.append(kl)
+
+    return float(np.mean(kls))
+
+
+def reward_correlation(w_true, w_recovered, test_trajs):
+    """
+    Pearson correlation between true and recovered reward on held-out trajectories.
+
+    Args:
+        w_true:       flat neural reward parameter vector (true)
+        w_recovered:  flat neural reward parameter vector (recovered)
+        test_trajs:   list of (obs, action) trajectory lists
+
+    Returns:
+        Pearson r in [-1, 1]; higher is better
+    """
+    import jax.numpy as jnp
+    from neural_reward import compute_reward
+
+    r_true_all, r_rec_all = [], []
+    for traj in test_trajs:
+        for obs, _action in traj:
+            obs_arr = jnp.asarray(obs, dtype=jnp.float32)
+            r_true_all.append(float(compute_reward(w_true, obs_arr)))
+            r_rec_all.append(float(compute_reward(w_recovered, obs_arr)))
+
+    r_true_all = np.array(r_true_all)
+    r_rec_all  = np.array(r_rec_all)
+
+    if SCIPY:
+        corr, _ = pearsonr(r_true_all, r_rec_all)
+    else:
+        corr = float(np.corrcoef(r_true_all, r_rec_all)[0, 1])
+
+    return float(corr) if np.isfinite(corr) else 0.0
 
 
 def log_metrics(sweep, assignments, weight_vectors, true_weights, true_assignments):
