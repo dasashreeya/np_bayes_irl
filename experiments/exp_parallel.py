@@ -1,4 +1,4 @@
 """Parallel NP-Bayes IRL -- all worker counts."""
-from run_speedup import speedup_experiment
+from run_speedup import run_speedup_experiment
 if __name__ == '__main__':
-    speedup_experiment(n_sweeps=100)
+    run_speedup_experiment(n_sweeps=100)

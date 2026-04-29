@@ -157,7 +157,7 @@ from gibbs import _gibbs_sweep_inner, remap_assignments
 from dp_prior import sample_new_weights
 
 
-@ray.remote
+@ray.remote(max_retries=0)
 def worker_sweep(traj_chunk, assignments_chunk, weight_vectors,
                  alpha, phi, T, gamma, beta, step_size, rng_seed):
     """
@@ -166,6 +166,10 @@ def worker_sweep(traj_chunk, assignments_chunk, weight_vectors,
     All args are plain numpy/python — no JAX device arrays crossed process boundary.
     Calls _gibbs_sweep_inner directly (picklable pure function, no state-dict wrap).
     """
+    import os
+    os.environ["JAX_PLATFORMS"] = "cpu"
+    os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=1"
+
     rng_key = jax.random.PRNGKey(rng_seed)
     phi = jnp.array(phi)
     T   = jnp.array(T)
@@ -225,6 +229,14 @@ def run_parallel(trajectories, phi, T,
     Each worker runs one full gibbs_sweep on its chunk per sweep.
     Merges states after every sweep.
     """
+    # Warm up JAX on the main process so workers inherit a compiled XLA cache
+    _dummy_w = jnp.zeros(phi.shape[1])
+    _dummy_phi = jnp.array(phi)
+    _dummy_T = jnp.array(T)
+    from likelihood import compute_log_pi
+    compute_log_pi(_dummy_w, _dummy_phi, _dummy_T, gamma, beta).block_until_ready()
+    print("JAX warmed up on main process ✓")
+
     if not ray.is_initialized():
         ray.init(ignore_reinit_error=True)
 
@@ -278,7 +290,10 @@ def run_parallel(trajectories, phi, T,
     print(f"\nTotal wall-time ({n_workers} workers, {n_sweeps} sweeps): "
           f"{time.time()-t0:.2f}s")
 
-    return assignments, [jnp.array(w) for w in weight_vectors]
+    return {
+        'assignments':    assignments,
+        'weight_vectors': [jnp.array(w) for w in weight_vectors],
+    }
 
 
 if __name__ == '__main__':
