@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+wandb/
+results/
+logs/
+*.err
+*.out
+venv/
