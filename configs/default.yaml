@@ -1,0 +1,26 @@
+# default.yaml -- base config for all experiments
+env:
+  size: 10
+  n_objects: 5
+  seed: 42
+
+data:
+  n_per_type: 10       # expert trajectories per reward type
+  n_types: 2           # ground truth K
+  traj_length: 20
+
+gibbs:
+  n_sweeps: 500
+  alpha: 1.0           # DP concentration -- tune this
+  gamma: 0.95          # discount factor
+  beta: 1.0            # Boltzmann temperature
+  step_size: 0.1       # MH proposal width -- tune for 20-50% acceptance
+  burn_in: 100         # sweeps to discard
+
+parallel:
+  n_workers: 4
+  seed: 0
+
+logging:
+  project: np-bayes-irl
+  log_every: 10        # log metrics every N sweeps
