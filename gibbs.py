@@ -241,8 +241,8 @@ def _gibbs_sweep_inner(trajectories, assignments, weight_vectors,
 
 
 def gibbs_sweep(trajectories, state, phi, T,
-                alpha=1.0, gamma=0.95, beta=1.0,
-                step_size=0.1, rng_key=None):
+                alpha=5.0, gamma=0.95, beta=5.0,
+                step_size=0.01, rng_key=None):
     """
     Public API — accepts and returns state dicts.
     Called by tests, run_serial.py, and parallel.py.
@@ -284,7 +284,7 @@ def gibbs_sweep(trajectories, state, phi, T,
 
 
 def run_gibbs(trajectories, phi, T,
-              n_sweeps=500, alpha=1.0, gamma=0.95, beta=1.0,
+              n_sweeps=500, alpha=5.0, gamma=0.95, beta=5.0,
               step_size=0.1, burn_in=100, rng_key=None, log_every=10):
     """
     Full Gibbs training loop.

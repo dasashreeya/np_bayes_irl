@@ -33,10 +33,10 @@ from figures import (
 SEED       = 42
 N_SWEEPS   = 500
 BURN_IN    = 100
-ALPHA      = 1.0
+ALPHA      = 5.0
 GAMMA      = 0.95
-BETA       = 1.0
-STEP_SIZE  = 0.1
+BETA       = 5.0
+STEP_SIZE  = 0.01
 N_WORKERS  = [1, 2, 4, 8, 16]
 N_SWEEPS_SPEEDUP = 100    # shorter run for timing experiment
 
