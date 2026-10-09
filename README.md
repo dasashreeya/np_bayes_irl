@@ -3,6 +3,21 @@
 Nonparametric Bayesian Inverse Reinforcement Learning using a Dirichlet Process prior,
 with data-parallel Gibbs sampling via Ray.
 
+## Project status (Oct 2026): read this first
+
+This repo is being reworked for a **TMLR submission** (target **Dec 18, 2026**). The full plan is in
+**[`docs/PROJECT_SCOPE.md`](docs/PROJECT_SCOPE.md)**: the audit, the work split between the two authors, the interfaces, the experiment matrix, the compute plan, the timeline and the decision log.
+
+> **Warning: don't cite the v1 numbers.** The current experiment scripts select the reported sampler state by ARI against the
+> ground-truth labels (`best_ari` / `best_state`), and parallel mode (`parallel.py`) does not sample the true posterior.
+> All results in `results/` and in arXiv v1 are being re-validated. See §2 of the scope doc.
+
+| Area | Owner |
+|---|---|
+| Inference, estimator, diagnostics, metrics, baselines; Experiments E0, A, C; writing lead | Sai Anirudh Katupilla (SA) |
+| Fast exact sampler, sweep runner, CI, compute (Zaratan, CPU and GPU); Experiments B, D, E | Shreeya Dasa Lakshminath (SD) |
+
+
 ## Setup
 
 ```bash
@@ -63,9 +78,12 @@ np_bayes_irl/
   configs/             # YAML configs
   tests/               # Unit tests
   results/             # Figures and run outputs
+  docs/                # Project scope and plan (PROJECT_SCOPE.md)
 ```
 
-## Zartan cluster
+## Zaratan cluster (UMD HPC)
+
+The cluster is UMD's **Zaratan**. The config file is still named `configs/zartan.yaml`. Sweeps run as CPU array jobs, and the GPU is used only for the Experiment D benchmark. See §7 of [`docs/PROJECT_SCOPE.md`](docs/PROJECT_SCOPE.md) for who runs what, job conventions and the SU budget. The commands below are the legacy v1 workflow.
 
 ```bash
 # On Zartan head node:
