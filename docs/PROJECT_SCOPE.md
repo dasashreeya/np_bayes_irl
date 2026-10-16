@@ -139,7 +139,7 @@ Each workstream has one owner, and the other author reviews its PRs. **SD is als
 
 ### WS0: Consolidation and infrastructure (Phase 0)
 - [ ] **SD:** commit the local-only scripts and results into `legacy/`, so the audit trail is kept.
-- [ ] **SA:** audit the `Result` branch for P1. Don't cite its numbers either way.
+- [x] **SA:** audit the `Result` branch for P1. Don't cite its numbers either way. → P1 confirmed; the committed `results/figures/` are also placeholders. See [`docs/audits/result_branch.md`](audits/result_branch.md).
 - [ ] **Both:** agree on the interfaces and the file-ownership table in §5. Merge a skeleton PR with stub functions before splitting up.
 - [ ] **SD:** build a config-driven sweep runner (`sweep.py`). It takes a YAML grid as input and writes one JSON per (config, seed, chain) under `results/<exp>/<config_hash>/`. Each record carries the git SHA, the full config, timings and the hostname/node type.
 - [ ] **SD:** add `tests/test_no_ground_truth_leak.py`. It's a CI check that fails if any sampler module imports `evaluate`, or receives true labels.
@@ -412,6 +412,7 @@ Append new rows; never edit old ones. If a decision is reversed, add a new row t
 | D5 | 2026-10-09 | Exact parallelism instead of an approximate merge | It's provably correct, simple to argue and easy to test. | SD (proposed) |
 | D6 | 2026-10-09 | CPU array jobs as primary compute; GPU only for D's benchmark | The tabular workload is small per chain and has many independent chains (§7). | SD (proposed) |
 | D7 | 2026-10-09 | Submit by Dec 18, with Jan 15 as fallback | The expanded experiments plus finals don't fit a November date. | SD (proposed) |
+| D8 | 2026-10-16 | Drop every `Result`-branch number, and treat `results/figures/` as placeholders, not evidence | The audit shows ARI-based selection and restarts (P1), and figures drawn from hardcoded values ([audit](audits/result_branch.md)). | SA (proposed) |
 
 *Each "proposed" entry becomes "agreed (SA, SD)" once both authors approve the PR that adds this file.*
 
@@ -425,6 +426,7 @@ These must be resolved in Phase 0.
 2. **Who holds the Zaratan allocation, and under which PI's project?** Students get access through a PI's project. Whoever isn't on it needs to be added before Phase 0 ends.
 3. **What is the SU budget on that allocation,** and does the proposed GPU cap (§7) fit within it?
 4. **Did the `Result` branch use ARI-based selection?** If so, its numbers are dropped for good.
+   - **Resolved (SA, 2026-10-16): yes.** The ARI 0.74 run reports the max-ARI state and restarts to it, so its numbers are dropped (D8). The audit also found that `results/figures/` holds placeholder plots ([audit](audits/result_branch.md)).
 5. **Is SA happy shelving `mujoco-neural-scale`?** If SA wrote it, SA has the final say on whether it stays on the remote.
 6. **Who handles the arXiv v2 submission?** SA is the submitting author on v1.
 
