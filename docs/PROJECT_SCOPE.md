@@ -151,14 +151,14 @@ Each workstream has one owner, and the other author reviews its PRs. **SD is als
 - one command runs a 2-config × 2-seed toy sweep end to end, locally and on Zaratan.
 
 ### WS1: Valid estimator and diagnostics (SA)
-- [ ] Store post-burn-in samples: assignments `(n_kept, N)`, weights, joint log-posterior, K and the MH acceptance rate.
-- [ ] Implement `summarize()`, with three outputs:
+- [x] Store post-burn-in samples: assignments `(n_kept, N)`, weights, joint log-posterior, K and the MH acceptance rate. (`sampler.Trace`)
+- [x] Implement `summarize()`, with three outputs:
   - the posterior distribution over K;
   - a point clustering from the posterior similarity matrix, chosen to minimize Binder loss;
   - the MAP state by joint log-posterior, reported as a secondary summary.
-- [ ] Delete all ARI-based selection and all ARI-triggered restarts. This fixes P1.
-- [ ] Implement R-hat and ESS on the label-invariant scalars (K and the joint log-posterior), plus trace plots across 4 chains.
-- [ ] Fix the "collapsed" terminology everywhere (P7), or actually collapse the sampler if a conjugate approximation is tractable. The default is to fix the terminology.
+- [~] Delete all ARI-based selection and all ARI-triggered restarts. This fixes P1. *(`run_serial.py` on `main` rewritten; `run_ablation.py`, `run_data_efficiency.py`, `run_k3_seed_validation.py` are only on SD's machine and go to `legacy/` as they are.)*
+- [~] Implement R-hat and ESS on the label-invariant scalars (K and the joint log-posterior), plus trace plots across 4 chains. *(R-hat/ESS done, matching arviz to 1e-15; trace plots wait for the `sweep.py` result format.)*
+- [~] Fix the "collapsed" terminology everywhere (P7), or actually collapse the sampler if a conjugate approximation is tractable. The default is to fix the terminology. *(code and README done; the paper text is done in WS6.)*
 
 **Done when:** a K=2 run and a K=3 run each produce a `PosteriorSummary` with R-hat < 1.05 on K and on log-posterior across 4 chains, and ground truth appears only in `evaluate()`.
 
@@ -171,8 +171,8 @@ Each workstream has one owner, and the other author reviews its PRs. **SD is als
 **Done when:** post-burn-in acceptance is between 0.15 and 0.40, and the K and log-posterior traces mix across chains without any restarts.
 
 ### WS3: Metrics and baselines (SA)
-- [ ] Replace `best_match_error` with Hungarian matching between true and recovered clusters. Report unmatched clusters as a separate over-clustering count, and weight the errors by cluster size. This fixes P4.
-- [ ] Always report the full posterior over K next to ARI and L2.
+- [x] Replace `best_match_error` with Hungarian matching between true and recovered clusters. Report unmatched clusters as a separate over-clustering count, and weight the errors by cluster size. This fixes P4.
+- [x] Always report the full posterior over K next to ARI and L2.
 - [ ] Implement the baselines, replacing the `exp_baselines.py` stub:
   - **sequential sampler** (same model; the reference for every speedup claim);
   - **finite mixture with K selected by BIC** over K ∈ {1…8};

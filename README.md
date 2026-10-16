@@ -81,10 +81,15 @@ np_bayes_irl/
   reward_features.py   # Linear reward utilities (P2, Day 2)
   dp_prior.py          # DP base measure G0 (P1, Day 3)
   likelihood.py        # Boltzmann likelihood (P2, Day 3)
-  gibbs.py             # Collapsed Gibbs sampler (Both, Day 4)
-  eval.py              # Evaluation metrics (P2, Day 5)
+  gibbs.py             # v1 Gibbs sweep (Neal Alg. 8 + MH, not collapsed); legacy, used by parallel.py
+  sampler.py           # DPM-BIRL MCMC (Neal Alg. 8, m=1, + MH), returns a Trace (SA)
+  likelihood_backend.py # Per-trajectory log-likelihoods behind one interface (SD)
+  summarize.py         # Posterior over K, PSM + Binder point estimate, MAP, R-hat/ESS (SA)
+  diagnostics.py       # Rank-normalized split R-hat and bulk ESS (SA)
+  evaluate.py          # The only module that sees ground truth (SA)
+  eval.py              # v1 metrics; best_match_error is one-sided (P4), use evaluate.py
   parallel.py          # Ray parallel workers (P2, Day 6)
-  run_serial.py        # Serial experiment (Both, Day 5)
+  run_serial.py        # Serial experiment: chains -> summarize -> evaluate (SA)
   run_speedup.py       # Speedup experiment (Both, Day 8)
   run_experiments.py   # Master script (Both, Day 10)
   figures.py           # All publication figures (Both, Day 11)

@@ -24,6 +24,9 @@ def best_match_error(true_weights, recovered_weights):
     """
     Match each true weight vector to its closest recovered vector.
     Returns mean L2 error over best matches.
+
+    Deprecated (P4): extra recovered clusters cost nothing here. Use
+    evaluate.matched_weight_error, which matches one-to-one and reports them.
     true_weights:      list of (n_features,) arrays
     recovered_weights: list of (n_features,) arrays
     """
