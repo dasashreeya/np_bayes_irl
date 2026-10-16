@@ -58,7 +58,7 @@ All ten files in `results/figures/` were added in `5bfcf18` (2026-04-26). That's
 ## What this means for us
 
 - **Don't cite anything** from `Result`, from W&B runs of `run_serial.py`, or from `results/figures/`. This includes the ARI 0.74 and the 4.79× speedup.
-- **Check arXiv v1.** If any v1 figure is one of these files, the v2 changelog has to say so plainly (§10 checklist). SA to check the v1 figures against these blobs before drafting the changelog.
+- **arXiv v1 (checked 2026-10-16): it does not appear to use these placeholder files.** v1 reports MaxEnt ARI = 0.000 (fig4 placeholder: 0.41), NP-Bayes ARI = 1.000 (placeholder: 0.89/0.91), and K converging after about 250 sweeps (fig3 placeholder: sweep 120). v1's numbers come from separate runs. The paper says ARI = 1.000 "at the end of a 500-sweep run", but `run_serial.py` with 500 sweeps (its default on both branches) returns the max-ARI state, not the last one. The repo can't show which script made the v1 run, so treat v1's numbers as affected by P1, and the v2 changelog retracts them.
 - **Recommendation (needs SD's approval, since SD owns `results/` sync):** in SD's `legacy/` consolidation PR, move `results/figures/` to `legacy/results/figures_placeholder_2026-04/` with a one-line README pointing here. Then nothing under `results/` predates the `sweep.py` provenance rules (§5).
 - **Branch fate.** `Result` holds no unique code worth keeping. Its only non-P1 changes are the Ray `max_retries=0`, the JAX-on-CPU env vars, a warm-up in `parallel.py` (all superseded by WS4), and an import-name fix in `experiments/exp_parallel.py`. Proposal: tag it `archive/result-2026-04` and delete the branch.
 
