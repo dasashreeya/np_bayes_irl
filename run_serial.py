@@ -29,6 +29,7 @@ def main(argv=None):
     ap.add_argument("--burn-in", type=int, default=100)
     ap.add_argument("--alpha", type=float, default=1.0)
     ap.add_argument("--step-size", type=float, default=0.05)
+    ap.add_argument("--n-mh-steps", type=int, default=1)
     ap.add_argument("--beta", type=float, default=5.0)
     ap.add_argument("--gamma", type=float, default=0.95)
     ap.add_argument("--n-per-type", type=int, default=10)
@@ -43,7 +44,7 @@ def main(argv=None):
                                              seed=args.data_seed)
     backend = LikelihoodBackend(phi, T, args.gamma, args.beta, trajs)
     cfg = SamplerConfig(alpha=args.alpha, n_sweeps=args.sweeps, burn_in=args.burn_in,
-                        step_size=args.step_size)
+                        step_size=args.step_size, n_mh_steps=args.n_mh_steps)
 
     traces = []
     for c in range(args.chains):
