@@ -122,6 +122,12 @@
 
 
 # gibbs.py  -- pure-function refactor (Day 11, Person A + fixes)
+# LEGACY: kept only for parallel.py. New code uses sampler.run_chain.
+# This is Neal (2000) Algorithm 8 with m = 1, not a collapsed sampler (P7).
+# Known bug: when trajectory i is a singleton, its cluster's weight is
+# dropped and the auxiliary is a fresh G0 draw, where Algorithm 8 reuses
+# the old weight. That biases the partition posterior (tests/test_sampler.py
+# has the exact toy posterior; this sweep under-counts K on it).
 # No global state, no class refs. pickle.dumps(gibbs_sweep) must succeed.
 
 import jax
