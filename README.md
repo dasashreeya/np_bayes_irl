@@ -17,6 +17,20 @@ This repo is being reworked for a **TMLR submission** (target **Dec 18, 2026**).
 | Inference, estimator, diagnostics, metrics, baselines; Experiments E0, A, C; writing lead | Sai Anirudh Katupilla (SA) |
 | Fast exact sampler, sweep runner, CI, compute (Zaratan, CPU and GPU); Experiments B, D, E | Shreeya Dasa Lakshminath (SD) |
 
+## Open decisions for Shreeya (from the `sa/*` branches, Oct 16)
+
+These came out of the WS0 skeleton and the WS1/WS2 work. Each one touches §5 of the scope doc, so it needs SD's sign-off; none blocks review of the code.
+
+1. **Interface additions proposed in the skeleton** (commit "WS0: skeleton for the shared interfaces in §5"). §5 lists `run_chain(backend, cfg, rng_key) -> Trace` and the `Trace` fields; the skeleton adds:
+   - `SamplerConfig`, a dataclass holding everything that controls one chain (`alpha`, `n_sweeps`, `burn_in`, `thin`, `step_size`, `n_mh_steps`, `adapt`, `target_accept`, `tau`, `init`), with `from_dict` rejecting unknown keys and `to_dict` for the result JSON;
+   - `Trace.step_size` (the MH step size in force after burn-in) and `Trace.config` (the `SamplerConfig` as a dict), next to the §5 fields;
+   - `Trace.to_dict()` / `Trace.from_dict()`, so `sweep.py` can write and read one JSON per chain;
+   - `run_chain` accepting an `int` seed or a `numpy.random.Generator` as well as a JAX PRNG key.
+   If SD agrees, §5 gets updated to match; if not, say which to drop.
+
+2. **`LikelihoodBackend.invalidate(weight_id)` exists but is never called.** §5 says `log_pi` is "cached by weight id" without saying what a weight id is: the Python `id()` of the array, a hash of its bytes, or an integer the sampler assigns per cluster. The sampler stores each cluster's weight as a numpy array and swaps in a new array on every accepted MH move, so it can pass whichever id SD defines. SD decides the id and the cache contract (who creates entries, when they expire); SA then wires the call into `sampler._update_weights`.
+
+3. **The O(N·K) → O(K) cost claim (§2 and WS4) needs revising.** The new sampler already keeps an `(N, K)` log-likelihood matrix in sync with the cluster weights, so the occupied clusters cost `K · n_mh_steps` soft-VI solves per sweep, not `N · K`. But Algorithm 8 draws a fresh auxiliary weight from G0 for every trajectory whose cluster isn't a singleton, and each one needs its own solve, so the per-sweep count is `N + K · n_mh_steps` solves. A `log_pi` cache can't remove the `N` term. Two ways to attack it, both WS4: (a) draw all N auxiliary weights at the start of the sweep (they're independent G0 draws that don't depend on the state, so this is still exact) and solve them in one `vmap` batch; (b) accept the `N` term and report the speedup honestly as "`N·K` → `N + K`". The scope text should say which.
 
 ## Setup
 
