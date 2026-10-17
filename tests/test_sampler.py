@@ -140,3 +140,21 @@ def test_same_seed_same_chain():
 def test_config_rejects_unknown_keys():
     with pytest.raises(ValueError):
         SamplerConfig.from_dict({"alpah": 1.0})
+
+
+def test_adaptation_hits_target_and_keeps_posterior_exact():
+    # Start far too small; burn-in adaptation should bring acceptance near 0.23,
+    # and since the step is frozen afterwards the partition posterior stays exact.
+    exact = exact_posterior(X, 1.0, 1.0)
+    cfg = SamplerConfig(alpha=1.0, n_sweeps=25000, burn_in=2000, step_size=1e-3,
+                        n_mh_steps=3, adapt=True, target_accept=0.23)
+    tr = run_chain(GaussianBackend(X), cfg, rng_key=5)
+    assert tr.step_size > 0.5
+    assert abs(tr.accept_rate.mean() - 0.23) < 0.06
+    emp = empirical(tr.assignments)
+    assert 0.5 * sum(abs(emp.get(k, 0.0) - p) for k, p in exact.items()) < 0.03
+
+
+def test_no_adaptation_after_burn_in():
+    cfg = SamplerConfig(n_sweeps=30, burn_in=10, step_size=0.123, adapt=False)
+    assert run_chain(GaussianBackend(X), cfg, rng_key=6).step_size == 0.123

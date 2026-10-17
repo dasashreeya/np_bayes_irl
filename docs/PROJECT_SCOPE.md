@@ -163,10 +163,10 @@ Each workstream has one owner, and the other author reviews its PRs. **SD is als
 **Done when:** a K=2 run and a K=3 run each produce a `PosteriorSummary` with R-hat < 1.05 on K and on log-posterior across 4 chains, and ground truth appears only in `evaluate()`.
 
 ### WS2: Sampler mixing (SA)
-- [ ] Adapt the MH step size during burn-in toward a target acceptance rate of about 0.23, then freeze it so the post-burn-in chain stays valid.
-- [ ] Make the number of MH steps per cluster per sweep configurable. As a stretch, add HMC on `w` given the assignments (JAX makes the gradient cheap).
-- [ ] Remove the collapse-to-K=1 restart hack. If it's still needed after adaptation, report it as a known limitation.
-- [ ] Log acceptance rates in every run (P5).
+- [x] Adapt the MH step size during burn-in toward a target acceptance rate of about 0.23, then freeze it so the post-burn-in chain stays valid.
+- [~] Make the number of MH steps per cluster per sweep configurable. As a stretch, add HMC on `w` given the assignments (JAX makes the gradient cheap). *(`n_mh_steps` done; HMC not started.)*
+- [x] Remove the collapse-to-K=1 restart hack. If it's still needed after adaptation, report it as a known limitation.
+- [x] Log acceptance rates in every run (P5). (`Trace.accept_rate`, per kept sweep)
 
 **Done when:** post-burn-in acceptance is between 0.15 and 0.40, and the K and log-posterior traces mix across chains without any restarts.
 

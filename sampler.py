@@ -42,7 +42,7 @@ class SamplerConfig:
     thin: int = 1
     step_size: float = 0.05
     n_mh_steps: int = 1
-    adapt: bool = False
+    adapt: bool = True
     target_accept: float = 0.23
     tau: float = 1.0
     init: str = "prior"
@@ -268,6 +268,15 @@ def _update_weights(st, backend, cfg, step_size, rng):
     return accepted, proposed
 
 
+def _adapt_step(step_size, accept_rate, t, target):
+    """
+    Robbins-Monro update of log(step_size) toward the target acceptance rate,
+    with gain (t + 1)^-0.6. Called only during burn-in; the step size is then
+    frozen, so the kept samples come from a fixed, valid MH kernel.
+    """
+    return float(step_size * np.exp((accept_rate - target) / (t + 1) ** 0.6))
+
+
 def run_chain(backend, cfg, rng_key):
     """
     Run one chain.
@@ -281,8 +290,6 @@ def run_chain(backend, cfg, rng_key):
     """
     if isinstance(cfg, dict):
         cfg = SamplerConfig.from_dict(cfg)
-    if cfg.adapt:
-        raise NotImplementedError("step-size adaptation lands with WS2; set adapt=False")
     if not 0 <= cfg.burn_in < cfg.n_sweeps:
         raise ValueError("need 0 <= burn_in < n_sweeps")
     rng = _as_generator(rng_key)
@@ -295,6 +302,8 @@ def run_chain(backend, cfg, rng_key):
     for sweep in range(cfg.n_sweeps):
         _sample_assignments(st, backend, cfg, rng)
         acc, prop = _update_weights(st, backend, cfg, step_size, rng)
+        if cfg.adapt and sweep < cfg.burn_in:
+            step_size = _adapt_step(step_size, acc / max(prop, 1), sweep, cfg.target_accept)
         if sweep >= cfg.burn_in and (sweep - cfg.burn_in) % cfg.thin == 0:
             Z.append(st.z.copy())
             Ws.append([w.copy() for w in st.W])
